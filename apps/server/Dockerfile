@@ -3,26 +3,27 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
+# Copy all package.json files for workspace resolution
 COPY package.json bun.lock ./
+COPY packages/config/package.json ./packages/config/
 COPY packages/db/package.json ./packages/db/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/api/package.json ./packages/api/
 COPY apps/server/package.json ./apps/server/
 RUN bun install --frozen-lockfile
 
-# Build
+# Build stage
 FROM base AS builder
+# Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=deps /app/packages/auth/node_modules ./packages/auth/node_modules
-COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
-COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
+# Copy all source code
 COPY . .
 
 # Production
 FROM base AS runner
 ENV NODE_ENV=production
 
+# Copy everything needed to run
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/server ./apps/server

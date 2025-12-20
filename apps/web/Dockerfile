@@ -3,23 +3,23 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
+# Copy all package.json files for workspace resolution
 COPY package.json bun.lock ./
+COPY packages/config/package.json ./packages/config/
 COPY packages/db/package.json ./packages/db/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/api/package.json ./packages/api/
 COPY apps/web/package.json ./apps/web/
 RUN bun install --frozen-lockfile
 
-# Build
+# Build stage
 FROM base AS builder
 ARG VITE_SERVER_URL
 ENV VITE_SERVER_URL=$VITE_SERVER_URL
 
+# Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=deps /app/packages/auth/node_modules ./packages/auth/node_modules
-COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
-COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+# Copy all source code
 COPY . .
 
 WORKDIR /app/apps/web
