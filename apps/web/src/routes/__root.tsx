@@ -1,3 +1,4 @@
+import "@fontsource-variable/geist-mono";
 import type { QueryClient } from "@tanstack/react-query";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";

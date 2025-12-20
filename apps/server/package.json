@@ -10,22 +10,23 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "elysia": "catalog:",
     "@elysiajs/cors": "^1.3.3",
-    "@orpc/server": "catalog:",
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/api": "workspace:*",
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/auth": "workspace:*",
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/db": "workspace:*",
     "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/api": "workspace:*",
-    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/auth": "workspace:*",
-    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/db": "workspace:*"
+    "drizzle-orm": "^0.45.1",
+    "elysia": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:",
     "tsdown": "^0.16.5",
-    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/config": "workspace:*"
+    "typescript": "catalog:"
   }
 }
