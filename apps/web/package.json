@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "start": "bun run .output/server/index.mjs",
     "serve": "vite preview",
     "dev": "vite dev"
   },
@@ -28,6 +29,7 @@
     "dotenv": "catalog:",
     "lucide-react": "^0.525.0",
     "next-themes": "^0.4.6",
+    "nitro": "^3.0.1-alpha.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-simple-maps": "^3.0.0",

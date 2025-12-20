@@ -1,5 +1,5 @@
-# Cache bust: v2
-FROM oven/bun:1 AS builder
+# Cache bust: v4
+FROM oven/bun:1
 WORKDIR /app
 
 ARG VITE_SERVER_URL
@@ -18,19 +18,8 @@ RUN bun install
 WORKDIR /app/apps/web
 RUN bun run build
 
-# Production - serve with nginx
-FROM nginx:alpine
+# Run with Bun (Nitro bun preset)
+ENV NODE_ENV=production
+EXPOSE 3000
 
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
-
-RUN echo 'server { \
-    listen 80; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["bun", "run", ".output/server/index.mjs"]
