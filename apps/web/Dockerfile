@@ -10,7 +10,7 @@ COPY packages/db/package.json ./packages/db/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/api/package.json ./packages/api/
 COPY apps/web/package.json ./apps/web/
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Build stage
 FROM base AS builder
