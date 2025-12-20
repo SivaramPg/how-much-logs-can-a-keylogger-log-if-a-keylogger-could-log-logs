@@ -142,10 +142,10 @@ export function WorldHeatmap() {
     <div className="space-y-4">
       <div className="overflow-hidden border border-green-900/50 bg-black/50">
         <ComposableMap
-          projection="geoOrthographic"
+          projection="geoMercator"
           projectionConfig={{
-            scale: 180,
-            rotate: [-78, -20, 0], // Centered on India/Asia
+            scale: 120,
+            center: [0, 30],
           }}
           height={400}
         >
