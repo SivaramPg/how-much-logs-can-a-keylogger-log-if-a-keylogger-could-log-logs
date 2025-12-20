@@ -35,11 +35,17 @@ export function useLiveStats(): UseLiveStatsReturn {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   const connect = useCallback(() => {
-    // Clean up existing connection
+    // Don't connect if unmounted
+    if (!isMountedRef.current) return;
+
+    // Clean up existing connection (don't wait for onclose)
     if (wsRef.current) {
+      wsRef.current.onclose = null; // Prevent old onclose from firing
       wsRef.current.close();
+      wsRef.current = null;
     }
 
     try {
@@ -47,6 +53,7 @@ export function useLiveStats(): UseLiveStatsReturn {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (!isMountedRef.current) return;
         setIsConnected(true);
         setError(null);
         reconnectAttempts.current = 0;
@@ -54,6 +61,7 @@ export function useLiveStats(): UseLiveStatsReturn {
       };
 
       ws.onmessage = (event) => {
+        if (!isMountedRef.current) return;
         try {
           const message = JSON.parse(event.data);
           if (message.type === "stats" && message.data) {
@@ -65,10 +73,14 @@ export function useLiveStats(): UseLiveStatsReturn {
       };
 
       ws.onerror = () => {
+        if (!isMountedRef.current) return;
         setError("Connection error");
       };
 
       ws.onclose = () => {
+        // Don't do anything if unmounted
+        if (!isMountedRef.current) return;
+
         setIsConnected(false);
         wsRef.current = null;
 
@@ -109,14 +121,18 @@ export function useLiveStats(): UseLiveStatsReturn {
 
   // Connect WebSocket
   useEffect(() => {
+    isMountedRef.current = true;
     connect();
 
     return () => {
+      isMountedRef.current = false;
       if (reconnectTimeout.current) {
         clearTimeout(reconnectTimeout.current);
       }
       if (wsRef.current) {
+        wsRef.current.onclose = null; // Prevent onclose from firing during cleanup
         wsRef.current.close();
+        wsRef.current = null;
       }
     };
   }, [connect]);

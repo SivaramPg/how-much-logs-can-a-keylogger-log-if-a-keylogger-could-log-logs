@@ -78,13 +78,17 @@ const app = new Elysia()
         server?.requestIP(request)?.address ||
         "unknown";
 
-      // Read Cloudflare geolocation headers
+      // Read Cloudflare geolocation headers (enable "Add visitor location headers" managed transform)
       const geo = {
         countryCode: request.headers.get("cf-ipcountry"),
-        country: request.headers.get("cf-ipcountry-name"),
+        country: request.headers.get("cf-region"), // Region name (e.g., "California")
         city: request.headers.get("cf-ipcity"),
         latitude: parseFloat(request.headers.get("cf-iplatitude") || "") || null,
         longitude: parseFloat(request.headers.get("cf-iplongitude") || "") || null,
+        continent: request.headers.get("cf-ipcontinent"),
+        regionCode: request.headers.get("cf-region-code"),
+        postalCode: request.headers.get("cf-postal-code"),
+        timezone: request.headers.get("cf-timezone"),
       };
 
       // Calculate latency (server time - client time)

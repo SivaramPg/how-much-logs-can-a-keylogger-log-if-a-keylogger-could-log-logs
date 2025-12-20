@@ -177,9 +177,15 @@ function HomeComponent() {
             </div>
 
             {/* Terminal Footer */}
-            <div className="flex items-center justify-between border-t border-green-900/50 bg-green-900/10 px-3 py-1 text-[10px] text-green-600">
-              <span>MODE: INSERT</span>
-              <span>UTF-8</span>
+            <div className="flex flex-col border-t border-green-900/50 bg-green-900/10 px-3 py-1 text-[10px] text-green-600">
+              <div className="flex items-center justify-between">
+                <span>MODE: INSERT</span>
+                <span>UTF-8</span>
+              </div>
+              <div className="mt-1 text-center text-green-700/70 border-t border-green-900/30 pt-1">
+                NOTICE: Only keystroke counts are logged. Actual key values are never stored or
+                transmitted.
+              </div>
             </div>
           </div>
 
