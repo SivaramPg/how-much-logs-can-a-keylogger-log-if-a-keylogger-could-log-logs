@@ -168,7 +168,7 @@ export function LatencyStats() {
       <div className="space-y-1 text-center text-[10px] text-green-800">
         <p>
           SERVER_LOCATION:{" "}
-          <span className="font-medium text-green-600">us-east-1 (N. Virginia)</span>
+          <span className="font-medium text-green-600">ap-southeast-1 (Singapore)</span>
         </p>
         <p>LATENCY_DELTA = SERVER_TIME - CLIENT_TIME</p>
       </div>
