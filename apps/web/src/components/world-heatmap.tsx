@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 
 function ensureProtocol(url: string | undefined): string {
   if (!url) return "http://localhost:3000";
@@ -16,60 +16,60 @@ interface LocationStat {
   totalKeystrokes: number;
 }
 
-// Map alpha-2 codes to alpha-3 for react-simple-maps (uses ISO 3166-1 alpha-3)
-const alpha2ToAlpha3: Record<string, string> = {
-  US: "USA",
-  GB: "GBR",
-  IN: "IND",
-  DE: "DEU",
-  FR: "FRA",
-  CA: "CAN",
-  AU: "AUS",
-  JP: "JPN",
-  CN: "CHN",
-  BR: "BRA",
-  RU: "RUS",
-  KR: "KOR",
-  IT: "ITA",
-  ES: "ESP",
-  MX: "MEX",
-  NL: "NLD",
-  SE: "SWE",
-  CH: "CHE",
-  PL: "POL",
-  BE: "BEL",
-  AT: "AUT",
-  NO: "NOR",
-  DK: "DNK",
-  FI: "FIN",
-  IE: "IRL",
-  NZ: "NZL",
-  SG: "SGP",
-  HK: "HKG",
-  TW: "TWN",
-  IL: "ISR",
-  AE: "ARE",
-  SA: "SAU",
-  ZA: "ZAF",
-  AR: "ARG",
-  CL: "CHL",
-  CO: "COL",
-  PH: "PHL",
-  TH: "THA",
-  MY: "MYS",
-  ID: "IDN",
-  VN: "VNM",
-  PK: "PAK",
-  BD: "BGD",
-  NG: "NGA",
-  EG: "EGY",
-  TR: "TUR",
-  UA: "UKR",
-  CZ: "CZE",
-  PT: "PRT",
-  GR: "GRC",
-  RO: "ROU",
-  HU: "HUN",
+// Map alpha-2 codes to numeric ISO 3166-1 (world-atlas uses numeric IDs)
+const alpha2ToNumeric: Record<string, string> = {
+  US: "840",
+  GB: "826",
+  IN: "356",
+  DE: "276",
+  FR: "250",
+  CA: "124",
+  AU: "036",
+  JP: "392",
+  CN: "156",
+  BR: "076",
+  RU: "643",
+  KR: "410",
+  IT: "380",
+  ES: "724",
+  MX: "484",
+  NL: "528",
+  SE: "752",
+  CH: "756",
+  PL: "616",
+  BE: "056",
+  AT: "040",
+  NO: "578",
+  DK: "208",
+  FI: "246",
+  IE: "372",
+  NZ: "554",
+  SG: "702",
+  HK: "344",
+  TW: "158",
+  IL: "376",
+  AE: "784",
+  SA: "682",
+  ZA: "710",
+  AR: "032",
+  CL: "152",
+  CO: "170",
+  PH: "608",
+  TH: "764",
+  MY: "458",
+  ID: "360",
+  VN: "704",
+  PK: "586",
+  BD: "050",
+  NG: "566",
+  EG: "818",
+  TR: "792",
+  UA: "804",
+  CZ: "203",
+  PT: "620",
+  GR: "300",
+  RO: "642",
+  HU: "348",
 };
 
 function getColor(count: number, maxCount: number): string {
@@ -109,11 +109,13 @@ export function WorldHeatmap() {
 
   const maxKeystrokes = Math.max(...locationStats.map((s) => s.totalKeystrokes), 1);
 
-  // Create a map of alpha-3 code to keystroke count
+  // Create a map of numeric ISO code to keystroke count
   const countryData = new Map<string, number>();
   for (const stat of locationStats) {
-    const alpha3 = alpha2ToAlpha3[stat.countryCode] || stat.countryCode;
-    countryData.set(alpha3, stat.totalKeystrokes);
+    const numericCode = alpha2ToNumeric[stat.countryCode];
+    if (numericCode) {
+      countryData.set(numericCode, stat.totalKeystrokes);
+    }
   }
 
   if (isLoading) {
@@ -140,35 +142,35 @@ export function WorldHeatmap() {
     <div className="space-y-4">
       <div className="overflow-hidden border border-green-900/50 bg-black/50">
         <ComposableMap
+          projection="geoOrthographic"
           projectionConfig={{
-            scale: 147,
+            scale: 180,
+            rotate: [-78, -20, 0], // Centered on India/Asia
           }}
           height={400}
         >
-          <ZoomableGroup center={[0, 20]} zoom={1}>
-            <Geographies geography={GEO_URL}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const alpha3 = geo.properties.ISO_A3 || geo.id;
-                  const count = countryData.get(alpha3) || 0;
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      fill={getColor(count, maxKeystrokes)}
-                      stroke="#064e3b"
-                      strokeWidth={0.5}
-                      style={{
-                        default: { outline: "none" },
-                        hover: { outline: "none", fill: "#4ade80" },
-                        pressed: { outline: "none" },
-                      }}
-                    />
-                  );
-                })
-              }
-            </Geographies>
-          </ZoomableGroup>
+          <Geographies geography={GEO_URL}>
+            {({ geographies }) =>
+              geographies.map((geo) => {
+                const numericId = geo.id;
+                const count = countryData.get(numericId) || 0;
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={getColor(count, maxKeystrokes)}
+                    stroke="#064e3b"
+                    strokeWidth={0.5}
+                    style={{
+                      default: { outline: "none" },
+                      hover: { outline: "none", fill: "#4ade80" },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                );
+              })
+            }
+          </Geographies>
         </ComposableMap>
       </div>
 

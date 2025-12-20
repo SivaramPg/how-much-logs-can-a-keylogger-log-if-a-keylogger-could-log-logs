@@ -151,7 +151,7 @@ const app = new Elysia()
         sampleCount: sql<number>`count(*)::int`,
         totalKeystrokes: sql<number>`sum(${keystrokeBatch.count})::int`,
         countryCode: keystrokeBatch.countryCode,
-        lastSeen: sql<string>`max(${keystrokeBatch.createdAt})::text`,
+        lastSeen: sql<string>`to_char(max(${keystrokeBatch.createdAt}) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(keystrokeBatch)
       .where(sql`${keystrokeBatch.latencyMs} IS NOT NULL`)
