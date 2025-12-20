@@ -1,0 +1,23 @@
+{
+  "name": "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/config": "workspace:*"
+  },
+  "dependencies": {
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:",
+    "@how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs/db": "workspace:*"
+  }
+}
