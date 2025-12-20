@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+function ensureProtocol(url: string | undefined): string {
+  if (!url) return "http://localhost:3000";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
+}
+
+const SERVER_URL = ensureProtocol(import.meta.env.VITE_SERVER_URL);
 const BATCH_SIZE = 10;
 const BATCH_INTERVAL_MS = 500;
 const STORAGE_KEY = "keylogger_my_keystrokes";
@@ -21,43 +27,49 @@ interface KeystrokeCaptureProps {
 export function KeystrokeCapture({ onKeystrokeCount, className }: KeystrokeCaptureProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [localCount, setLocalCount] = useState(getStoredCount);
   const keystrokeBuffer = useRef<number>(0);
   const lastFlush = useRef<number>(Date.now());
   const flushTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize anonymous session
-  useEffect(() => {
-    const initSession = async () => {
-      try {
-        // Check if we already have a session
-        const { data: existingSession } = await authClient.getSession();
+  const initSession = useCallback(async () => {
+    setError(null);
+    try {
+      // Check if we already have a session
+      const { data: existingSession } = await authClient.getSession();
 
-        if (existingSession?.session) {
-          setSessionId(existingSession.session.id);
-          setIsReady(true);
-          return;
-        }
-
-        // Create anonymous session
-        const { data, error } = await authClient.signIn.anonymous();
-
-        if (error) {
-          console.error("Failed to create anonymous session:", error);
-          return;
-        }
-
-        if (data?.session) {
-          setSessionId(data.session.id);
-          setIsReady(true);
-        }
-      } catch (err) {
-        console.error("Session initialization error:", err);
+      if (existingSession?.session) {
+        setSessionId(existingSession.session.id);
+        setIsReady(true);
+        return;
       }
-    };
 
-    initSession();
+      // Create anonymous session
+      const { data, error: authError } = await authClient.signIn.anonymous();
+
+      if (authError) {
+        console.error("Failed to create anonymous session:", authError);
+        setError("AUTH_FAILED");
+        return;
+      }
+
+      if (data?.session) {
+        setSessionId(data.session.id);
+        setIsReady(true);
+      } else {
+        setError("NO_SESSION");
+      }
+    } catch (err) {
+      console.error("Session initialization error:", err);
+      setError("CONNECTION_ERROR");
+    }
   }, []);
+
+  useEffect(() => {
+    initSession();
+  }, [initSession]);
 
   const flushKeystrokes = useCallback(() => {
     if (!sessionId || keystrokeBuffer.current === 0) {
@@ -175,6 +187,20 @@ export function KeystrokeCapture({ onKeystrokeCount, className }: KeystrokeCaptu
       }
     };
   }, [flushKeystrokes]);
+
+  if (error) {
+    return (
+      <div className="border-red-500/30 border border-dashed p-8 text-center space-y-4">
+        <p className="text-red-500 font-mono">[ ERROR: {error} ]</p>
+        <button
+          onClick={initSession}
+          className="px-4 py-2 bg-red-500/20 text-red-500 font-mono text-sm border border-red-500/50 hover:bg-red-500/30 transition-colors"
+        >
+          RETRY_CONNECTION
+        </button>
+      </div>
+    );
+  }
 
   if (!isReady) {
     return (

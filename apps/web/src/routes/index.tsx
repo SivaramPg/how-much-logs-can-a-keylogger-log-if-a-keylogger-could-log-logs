@@ -6,6 +6,7 @@ import { useLiveStats } from "@/hooks/use-live-stats";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  ssr: false,
 });
 
 function formatNumber(num: number): string {

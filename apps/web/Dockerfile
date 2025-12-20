@@ -1,15 +1,14 @@
-# Cache bust: v5
+# Cache bust: v6
 FROM oven/bun:1
 WORKDIR /app
 
 ARG VITE_SERVER_URL
 ENV VITE_SERVER_URL=$VITE_SERVER_URL
 
-# Copy everything
+# Copy only what web needs (no server/api/db dependencies)
 COPY package.json bun.lock ./
-COPY packages ./packages
+COPY packages/config ./packages/config
 COPY apps/web ./apps/web
-COPY apps/server/package.json ./apps/server/
 
 # Install dependencies
 RUN bun install

@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+function ensureProtocol(url: string | undefined): string {
+  if (!url) return "http://localhost:3000";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
+}
+
+const SERVER_URL = ensureProtocol(import.meta.env.VITE_SERVER_URL);
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 interface LocationStat {

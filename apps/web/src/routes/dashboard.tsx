@@ -1,23 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { LatencyStats } from "@/components/latency-stats";
 import { WorldHeatmap } from "@/components/world-heatmap";
-import { getUser } from "@/functions/get-user";
+import { authClient } from "@/lib/auth-client";
 import { useLiveStats } from "@/hooks/use-live-stats";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await getUser();
-    return { session };
-  },
-  loader: async ({ context }) => {
-    if (!context.session) {
-      throw redirect({
-        to: "/login",
-      });
-    }
-  },
+  ssr: false,
 });
 
 function formatNumber(num: number): string {
@@ -67,8 +58,29 @@ function StatBox({
 }
 
 function RouteComponent() {
-  const { session } = Route.useRouteContext();
+  const navigate = useNavigate();
   const { stats, isConnected } = useLiveStats();
+  const [session, setSession] = useState<{ user: { name?: string } } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    authClient.getSession().then(({ data }) => {
+      if (!data?.session) {
+        navigate({ to: "/login" });
+      } else {
+        setSession({ user: data.user });
+      }
+      setIsLoading(false);
+    });
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-full items-center justify-center bg-black font-mono text-green-500">
+        <p className="animate-pulse">[ AUTHENTICATING... ]</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-full flex-col bg-black p-6 font-mono text-green-500 selection:bg-green-900 selection:text-white">
