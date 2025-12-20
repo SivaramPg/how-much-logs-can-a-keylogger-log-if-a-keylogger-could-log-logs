@@ -1,8 +1,9 @@
 FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (including devDependencies for build)
 FROM base AS deps
+ENV NODE_ENV=development
 # Copy all package.json files for workspace resolution
 COPY package.json bun.lock ./
 COPY packages/config/package.json ./packages/config/
