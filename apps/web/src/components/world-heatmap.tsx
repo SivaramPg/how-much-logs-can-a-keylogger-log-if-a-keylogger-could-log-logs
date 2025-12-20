@@ -12,7 +12,6 @@ const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
 interface LocationStat {
   countryCode: string;
-  country: string | null;
   totalKeystrokes: number;
 }
 
@@ -184,7 +183,7 @@ export function WorldHeatmap() {
             <div className="font-mono font-bold tabular-nums text-green-400">
               {stat.totalKeystrokes.toLocaleString()}
             </div>
-            <div className="text-xs text-green-700">{stat.country || stat.countryCode}</div>
+            <div className="text-xs text-green-700">{stat.countryCode}</div>
           </div>
         ))}
       </div>

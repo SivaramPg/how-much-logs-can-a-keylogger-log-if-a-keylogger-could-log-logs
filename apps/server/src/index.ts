@@ -134,12 +134,11 @@ const app = new Elysia()
     const results = await db
       .select({
         countryCode: keystrokeBatch.countryCode,
-        country: keystrokeBatch.country,
         totalKeystrokes: sql<number>`sum(${keystrokeBatch.count})::int`,
       })
       .from(keystrokeBatch)
       .where(sql`${keystrokeBatch.countryCode} IS NOT NULL`)
-      .groupBy(keystrokeBatch.countryCode, keystrokeBatch.country)
+      .groupBy(keystrokeBatch.countryCode)
       .orderBy(sql`sum(${keystrokeBatch.count}) DESC`);
 
     return results;
