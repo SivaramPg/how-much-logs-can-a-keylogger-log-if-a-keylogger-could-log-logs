@@ -1,4 +1,4 @@
-# Simple single-stage build
+# Cache bust: v2
 FROM oven/bun:1
 WORKDIR /app
 
