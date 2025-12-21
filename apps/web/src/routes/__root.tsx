@@ -20,7 +20,8 @@ const siteConfig = {
   description:
     "A global keystroke leaderboard. Compete to be the most watched. No actual keys are logged - only counts. Inspired by Amazon's latency detection protocol.",
   url: "https://how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs.sivaramp.com",
-  image: "/opengraph-image.png",
+  image:
+    "https://how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs.sivaramp.com/opengraph-image.png",
   creator: "@SivaramPg",
 };
 
