@@ -48,18 +48,19 @@ export function KeystrokeCapture({
 
       const existingSession = sessionResult.data;
 
-      // Use existing session if available (token or user.id as fallback)
+      // Use existing session if available
       if (existingSession) {
+        // Session structure: { session: { id, token, ... }, user: { id, ... } }
+        const sessionId =
+          existingSession.session?.id || existingSession.session?.token || existingSession.user?.id;
         console.log("[Auth] Existing session found:", {
-          hasToken: !!existingSession.token,
-          token: existingSession.token?.slice(0, 20) + "...",
+          sessionId: existingSession.session?.id,
+          sessionToken: existingSession.session?.token?.slice(0, 10) + "...",
           userId: existingSession.user?.id,
-          userEmail: existingSession.user?.email,
         });
-        const id = existingSession.token || existingSession.user?.id;
-        if (id) {
-          console.log("[Auth] Using session ID:", id.slice(0, 20) + "...");
-          setSessionId(id);
+        if (sessionId) {
+          console.log("[Auth] Using session ID:", sessionId.slice(0, 20) + "...");
+          setSessionId(sessionId);
           setIsReady(true);
           return;
         }
@@ -82,7 +83,10 @@ export function KeystrokeCapture({
           const retryResult = await authClient.getSession();
           console.log("[Auth] Retry getSession() result:", JSON.stringify(retryResult, null, 2));
           if (retryResult.data) {
-            const id = retryResult.data.token || retryResult.data.user?.id;
+            const id =
+              retryResult.data.session?.id ||
+              retryResult.data.session?.token ||
+              retryResult.data.user?.id;
             if (id) {
               console.log("[Auth] Recovered session ID:", id.slice(0, 20) + "...");
               setSessionId(id);
@@ -98,10 +102,11 @@ export function KeystrokeCapture({
 
       if (data) {
         console.log("[Auth] New anonymous session data:", {
-          hasToken: !!data.token,
+          sessionId: data.session?.id,
+          sessionToken: data.session?.token?.slice(0, 10) + "...",
           userId: data.user?.id,
         });
-        const id = data.token || data.user?.id;
+        const id = data.session?.id || data.session?.token || data.user?.id;
         if (id) {
           console.log("[Auth] Using new session ID:", id.slice(0, 20) + "...");
           setSessionId(id);
