@@ -12,10 +12,13 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-green-800 bg-black/95 text-green-500 backdrop-blur supports-[backdrop-filter]:bg-black/60 font-mono">
       <div className="flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 font-bold text-green-400">
+          <Link
+            to="/"
+            className="flex items-center gap-2 font-bold text-green-400 hover:text-green-300 transition-colors"
+          >
             <span className="animate-pulse">_</span>
             <span>KEYLOGGER.SYS</span>
-          </div>
+          </Link>
           <nav className="flex gap-4 text-sm">
             {links.map(({ to, label }) => {
               return (
