@@ -66,7 +66,7 @@ class StateManager {
       await db.insert(globalStats).values({ id: 1, totalKeystrokes: 0 });
       this.cachedTotalKeystrokes = 0;
     } else {
-      this.cachedTotalKeystrokes = stats[0].totalKeystrokes;
+      this.cachedTotalKeystrokes = stats[0]?.totalKeystrokes ?? 0;
     }
 
     // Start flush interval (every 5 seconds)

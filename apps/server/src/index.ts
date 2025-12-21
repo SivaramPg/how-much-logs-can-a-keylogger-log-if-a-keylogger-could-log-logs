@@ -37,7 +37,7 @@ const apiHandler = new OpenAPIHandler(appRouter, {
 // Initialize state manager before starting server
 await stateManager.initialize();
 
-const app = new Elysia()
+new Elysia()
   .use(
     cors({
       origin: process.env.CORS_ORIGIN || "",

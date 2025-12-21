@@ -45,8 +45,8 @@ export function KeystrokeCapture({
       // Check if we already have a session
       const { data: existingSession } = await authClient.getSession();
 
-      if (existingSession?.session) {
-        setSessionId(existingSession.session.id);
+      if (existingSession?.token) {
+        setSessionId(existingSession.token);
         setIsReady(true);
         return;
       }
@@ -60,8 +60,8 @@ export function KeystrokeCapture({
         return;
       }
 
-      if (data?.session) {
-        setSessionId(data.session.id);
+      if (data?.token) {
+        setSessionId(data.token);
         setIsReady(true);
       } else {
         setError("NO_SESSION");
