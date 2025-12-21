@@ -57,8 +57,8 @@ new Elysia()
         readyState: ws.readyState,
       });
       // Send current stats immediately on connect
-      const stats = stateManager.getStats();
-      ws.send(JSON.stringify({ type: "stats", data: stats }));
+      // Format: [totalKeystrokes, activeUsers, bufferedKeystrokes]
+      ws.send(JSON.stringify(stateManager.getStatsArray()));
     },
     close(ws) {
       stateManager.removeClient(ws.id);
@@ -159,7 +159,7 @@ new Elysia()
       .from(keystrokeBatch)
       .where(sql`${keystrokeBatch.latencyMs} IS NOT NULL`)
       .groupBy(keystrokeBatch.sessionId, keystrokeBatch.countryCode)
-      .having(sql`count(*) >= 3`) // Filter out sessions with too few samples
+      .having(sql`count(*) >= 1`) // Show latency data immediately
       .orderBy(sql`avg(${keystrokeBatch.latencyMs}) DESC`) // Most suspicious first
       .limit(50);
 

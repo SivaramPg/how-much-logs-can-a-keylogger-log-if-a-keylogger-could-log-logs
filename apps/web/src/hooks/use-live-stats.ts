@@ -63,9 +63,14 @@ export function useLiveStats(): UseLiveStatsReturn {
       ws.onmessage = (event) => {
         if (!isMountedRef.current) return;
         try {
-          const message = JSON.parse(event.data);
-          if (message.type === "stats" && message.data) {
-            setStats(message.data);
+          // Format: [totalKeystrokes, activeUsers, bufferedKeystrokes]
+          const data = JSON.parse(event.data);
+          if (Array.isArray(data) && data.length === 3) {
+            setStats({
+              totalKeystrokes: data[0],
+              activeUsers: data[1],
+              bufferedKeystrokes: data[2],
+            });
           }
         } catch (err) {
           console.error("[WebSocket] Failed to parse message:", err);

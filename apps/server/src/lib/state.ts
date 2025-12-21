@@ -74,10 +74,10 @@ class StateManager {
       this.flushToDatabase().catch(console.error);
     }, 5000);
 
-    // Start broadcast interval (every 2 seconds)
+    // Start broadcast interval (every 1 second for real-time feel)
     this.broadcastInterval = setInterval(() => {
       this.broadcastStats();
-    }, 2000);
+    }, 1000);
 
     // Clean up old rate limit entries every minute
     setInterval(() => {
@@ -230,6 +230,19 @@ class StateManager {
     };
   }
 
+  /**
+   * Returns stats as a compact array for WebSocket broadcast.
+   * Format: [totalKeystrokes, activeUsers, bufferedKeystrokes]
+   * @see Stats interface for field descriptions
+   */
+  getStatsArray(): [number, number, number] {
+    return [
+      this.cachedTotalKeystrokes,
+      this.connectedClients.size,
+      Array.from(this.keystrokeBuffer.values()).reduce((sum, b) => sum + b.count, 0),
+    ];
+  }
+
   addClient(client: WebSocketClient): void {
     this.connectedClients.set(client.id, client);
     console.log(
@@ -249,8 +262,7 @@ class StateManager {
       return;
     }
 
-    const stats = this.getStats();
-    const message = JSON.stringify({ type: "stats", data: stats });
+    const message = JSON.stringify(this.getStatsArray());
 
     for (const client of this.connectedClients.values()) {
       try {

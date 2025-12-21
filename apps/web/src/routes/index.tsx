@@ -86,21 +86,13 @@ function HomeComponent() {
         const response = await fetch(`${SERVER_URL}/stats/latency`);
         if (response.ok) {
           const data = await response.json();
-          console.log("[Latency] Looking for session:", mySessionId);
-          console.log(
-            "[Latency] Available sessions:",
-            data.map((s: { sessionId: string }) => s.sessionId),
-          );
           const myStats = data.find((s: { sessionId: string }) => s.sessionId === mySessionId);
           if (myStats) {
-            console.log("[Latency] Found my stats:", myStats);
             setMyLatency({
               avgLatency: myStats.avgLatency,
               minLatency: myStats.minLatency,
               maxLatency: myStats.maxLatency,
             });
-          } else {
-            console.log("[Latency] No matching session found");
           }
         }
       } catch {
@@ -182,8 +174,11 @@ function HomeComponent() {
             <div className="border border-green-800 bg-green-900/5 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-green-600 uppercase tracking-widest mb-1 font-bold">
+                  <div className="text-sm text-green-600 uppercase tracking-widest mb-1 font-bold flex items-center gap-2">
                     YOUR_SIGNAL_DELAY
+                    <span className="text-[9px] text-green-800 font-normal">
+                      → SG (ap-southeast-1)
+                    </span>
                   </div>
                   {myLatency ? (
                     <>
