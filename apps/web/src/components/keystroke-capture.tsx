@@ -21,10 +21,15 @@ function getStoredCount(): number {
 
 interface KeystrokeCaptureProps {
   onKeystrokeCount?: (count: number) => void;
+  onSessionId?: (sessionId: string) => void;
   className?: string;
 }
 
-export function KeystrokeCapture({ onKeystrokeCount, className }: KeystrokeCaptureProps) {
+export function KeystrokeCapture({
+  onKeystrokeCount,
+  onSessionId,
+  className,
+}: KeystrokeCaptureProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +142,13 @@ export function KeystrokeCapture({ onKeystrokeCount, className }: KeystrokeCaptu
   useEffect(() => {
     onKeystrokeCount?.(localCount);
   }, [localCount, onKeystrokeCount]);
+
+  // Notify parent when sessionId is set
+  useEffect(() => {
+    if (sessionId) {
+      onSessionId?.(sessionId);
+    }
+  }, [sessionId, onSessionId]);
 
   // Debounced persist to localStorage
   const storageTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);

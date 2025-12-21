@@ -4,6 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { KeystrokeCapture } from "@/components/keystroke-capture";
 import { useLiveStats } from "@/hooks/use-live-stats";
 
+function ensureProtocol(url: string | undefined): string {
+  if (!url) return "http://localhost:3000";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
+}
+
+const SERVER_URL = ensureProtocol(import.meta.env.VITE_SERVER_URL);
+
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   ssr: false,
@@ -42,10 +50,25 @@ function StatBox({
   );
 }
 
+interface UserLatency {
+  avgLatency: number;
+  minLatency: number;
+  maxLatency: number;
+}
+
+function getLatencyColor(latency: number): string {
+  if (latency < 50) return "text-green-500";
+  if (latency < 100) return "text-yellow-500";
+  if (latency < 200) return "text-orange-500";
+  return "text-red-500";
+}
+
 function HomeComponent() {
   const { stats, isConnected, error } = useLiveStats();
   const [myKeystrokes, setMyKeystrokes] = useState(0);
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [mySessionId, setMySessionId] = useState<string | null>(null);
+  const [myLatency, setMyLatency] = useState<UserLatency | null>(null);
 
   useEffect(() => {
     const updateTime = () => setCurrentTime(new Date().toISOString());
@@ -53,6 +76,34 @@ function HomeComponent() {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch user's own latency stats
+  useEffect(() => {
+    if (!mySessionId) return;
+
+    const fetchLatency = async () => {
+      try {
+        const response = await fetch(`${SERVER_URL}/stats/latency`);
+        if (response.ok) {
+          const data = await response.json();
+          const myStats = data.find((s: { sessionId: string }) => s.sessionId === mySessionId);
+          if (myStats) {
+            setMyLatency({
+              avgLatency: myStats.avgLatency,
+              minLatency: myStats.minLatency,
+              maxLatency: myStats.maxLatency,
+            });
+          }
+        }
+      } catch {
+        // Silently fail
+      }
+    };
+
+    fetchLatency();
+    const interval = setInterval(fetchLatency, 3000);
+    return () => clearInterval(interval);
+  }, [mySessionId]);
 
   return (
     <div className="flex min-h-full flex-col bg-black p-4 font-mono text-green-500 selection:bg-green-900 selection:text-white">
@@ -94,29 +145,72 @@ function HomeComponent() {
             </div>
           </div>
 
-          {/* Global Metrics Panel */}
+          {/* Surveillance Metrics Panel */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 border-b border-green-900/50 pb-1">
               <div className="h-2 w-2 bg-green-500"></div>
-              <h3 className="text-base font-bold tracking-widest">GLOBAL_METRICS</h3>
+              <h3 className="text-base font-bold tracking-widest">SURVEILLANCE_FEED</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
               <StatBox
-                label="TOTAL_LOGGED_KEYS"
+                label="KEYSTROKES_INTERCEPTED"
                 value={formatNumber(stats.totalKeystrokes)}
-                subtext="Global aggregate across all nodes"
+                subtext="Harvested from unsuspecting typists"
               />
               <StatBox
-                label="ACTIVE_NODES"
+                label="SNOOPEES_ONLINE"
                 value={stats.activeUsers}
-                subtext="Currently connected agents"
+                subtext="Currently being watched"
               />
               <StatBox
-                label="LOCAL_BUFFER"
+                label="YOUR_CONTRIBUTION"
                 value={formatNumber(myKeystrokes)}
-                subtext="Session contribution"
+                subtext="Thanks for participating"
               />
+            </div>
+
+            {/* Your Latency Monitor */}
+            <div className="border border-green-800 bg-green-900/5 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-green-600 uppercase tracking-widest mb-1 font-bold">
+                    YOUR_SIGNAL_DELAY
+                  </div>
+                  {myLatency ? (
+                    <>
+                      <div
+                        className={`text-3xl font-black tabular-nums tracking-tighter ${getLatencyColor(myLatency.avgLatency)}`}
+                      >
+                        {myLatency.avgLatency}ms
+                      </div>
+                      <div className="text-[10px] text-green-800 mt-0.5 tabular-nums">
+                        Range: {myLatency.minLatency}ms — {myLatency.maxLatency}ms
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-xl font-bold text-green-700 animate-pulse">
+                      AWAITING_DATA...
+                    </div>
+                  )}
+                </div>
+                <div className="text-right">
+                  {myLatency ? (
+                    <div className="text-xs text-green-700">
+                      {myLatency.avgLatency < 50 && "We see you nearby..."}
+                      {myLatency.avgLatency >= 50 &&
+                        myLatency.avgLatency < 100 &&
+                        "Regional signal detected"}
+                      {myLatency.avgLatency >= 100 &&
+                        myLatency.avgLatency < 200 &&
+                        "You're far from home"}
+                      {myLatency.avgLatency >= 200 && "Suspicious distance..."}
+                    </div>
+                  ) : (
+                    <div className="text-[10px] text-green-800">Type something to be tracked</div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -172,7 +266,11 @@ function HomeComponent() {
               {/* Grid overlay effect */}
               <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]"></div>
               <div className="relative z-10 h-full">
-                <KeystrokeCapture onKeystrokeCount={setMyKeystrokes} className="h-full" />
+                <KeystrokeCapture
+                  onKeystrokeCount={setMyKeystrokes}
+                  onSessionId={setMySessionId}
+                  className="h-full"
+                />
               </div>
             </div>
 
