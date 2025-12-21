@@ -43,81 +43,50 @@ export function KeystrokeCapture({
     setError(null);
     try {
       // Check if we already have a session
-      const sessionResult = await authClient.getSession();
-      console.log("[Auth] getSession() result:", JSON.stringify(sessionResult, null, 2));
+      const { data: existingSession } = await authClient.getSession();
 
-      const existingSession = sessionResult.data;
-
-      // Use existing session if available
+      // Use existing session if available (structure: { session: { id, token }, user: { id } })
       if (existingSession) {
-        // Session structure: { session: { id, token, ... }, user: { id, ... } }
-        const sessionId =
+        const id =
           existingSession.session?.id || existingSession.session?.token || existingSession.user?.id;
-        console.log("[Auth] Existing session found:", {
-          sessionId: existingSession.session?.id,
-          sessionToken: existingSession.session?.token?.slice(0, 10) + "...",
-          userId: existingSession.user?.id,
-        });
-        if (sessionId) {
-          console.log("[Auth] Using session ID:", sessionId.slice(0, 20) + "...");
-          setSessionId(sessionId);
+        if (id) {
+          setSessionId(id);
           setIsReady(true);
           return;
         }
-      } else {
-        console.log("[Auth] No existing session found");
       }
 
       // Create anonymous session
-      console.log("[Auth] Creating new anonymous session...");
-      const anonResult = await authClient.signIn.anonymous();
-      console.log("[Auth] signIn.anonymous() result:", JSON.stringify(anonResult, null, 2));
-
-      const { data, error: authError } = anonResult;
+      const { data, error: authError } = await authClient.signIn.anonymous();
 
       if (authError) {
-        console.log("[Auth] Anonymous sign-in error:", authError.code);
         // If already anonymous, try to get the session again
         if (authError.code === "ANONYMOUS_USERS_CANNOT_SIGN_IN_AGAIN_ANONYMOUSLY") {
-          console.log("[Auth] Already anonymous, retrying getSession...");
-          const retryResult = await authClient.getSession();
-          console.log("[Auth] Retry getSession() result:", JSON.stringify(retryResult, null, 2));
-          if (retryResult.data) {
+          const { data: retrySession } = await authClient.getSession();
+          if (retrySession) {
             const id =
-              retryResult.data.session?.id ||
-              retryResult.data.session?.token ||
-              retryResult.data.user?.id;
+              retrySession.session?.id || retrySession.session?.token || retrySession.user?.id;
             if (id) {
-              console.log("[Auth] Recovered session ID:", id.slice(0, 20) + "...");
               setSessionId(id);
               setIsReady(true);
               return;
             }
           }
         }
-        console.error("Failed to create anonymous session:", authError);
         setError("AUTH_FAILED");
         return;
       }
 
       if (data) {
-        console.log("[Auth] New anonymous session data:", {
-          sessionId: data.session?.id,
-          sessionToken: data.session?.token?.slice(0, 10) + "...",
-          userId: data.user?.id,
-        });
         const id = data.session?.id || data.session?.token || data.user?.id;
         if (id) {
-          console.log("[Auth] Using new session ID:", id.slice(0, 20) + "...");
           setSessionId(id);
           setIsReady(true);
           return;
         }
       }
-      console.log("[Auth] No session ID found, setting error");
       setError("NO_SESSION");
-    } catch (err) {
-      console.error("Session initialization error:", err);
+    } catch {
       setError("CONNECTION_ERROR");
     }
   }, []);
