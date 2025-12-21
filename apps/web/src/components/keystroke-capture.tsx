@@ -45,15 +45,11 @@ export function KeystrokeCapture({
       // Check if we already have a session
       const { data: existingSession } = await authClient.getSession();
 
-      // Use existing session if available (structure: { session: { id, token }, user: { id } })
-      if (existingSession) {
-        const id =
-          existingSession.session?.id || existingSession.session?.token || existingSession.user?.id;
-        if (id) {
-          setSessionId(id);
-          setIsReady(true);
-          return;
-        }
+      // Use existing session if available - must use session.id to match FK constraint
+      if (existingSession?.session?.id) {
+        setSessionId(existingSession.session.id);
+        setIsReady(true);
+        return;
       }
 
       // Create anonymous session
@@ -63,27 +59,20 @@ export function KeystrokeCapture({
         // If already anonymous, try to get the session again
         if (authError.code === "ANONYMOUS_USERS_CANNOT_SIGN_IN_AGAIN_ANONYMOUSLY") {
           const { data: retrySession } = await authClient.getSession();
-          if (retrySession) {
-            const id =
-              retrySession.session?.id || retrySession.session?.token || retrySession.user?.id;
-            if (id) {
-              setSessionId(id);
-              setIsReady(true);
-              return;
-            }
+          if (retrySession?.session?.id) {
+            setSessionId(retrySession.session.id);
+            setIsReady(true);
+            return;
           }
         }
         setError("AUTH_FAILED");
         return;
       }
 
-      if (data) {
-        const id = data.session?.id || data.session?.token || data.user?.id;
-        if (id) {
-          setSessionId(id);
-          setIsReady(true);
-          return;
-        }
+      if (data?.session?.id) {
+        setSessionId(data.session.id);
+        setIsReady(true);
+        return;
       }
       setError("NO_SESSION");
     } catch {
