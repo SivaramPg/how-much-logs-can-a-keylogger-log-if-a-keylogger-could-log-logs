@@ -86,13 +86,21 @@ function HomeComponent() {
         const response = await fetch(`${SERVER_URL}/stats/latency`);
         if (response.ok) {
           const data = await response.json();
+          console.log("[Latency] Looking for session:", mySessionId);
+          console.log(
+            "[Latency] Available sessions:",
+            data.map((s: { sessionId: string }) => s.sessionId),
+          );
           const myStats = data.find((s: { sessionId: string }) => s.sessionId === mySessionId);
           if (myStats) {
+            console.log("[Latency] Found my stats:", myStats);
             setMyLatency({
               avgLatency: myStats.avgLatency,
               minLatency: myStats.minLatency,
               maxLatency: myStats.maxLatency,
             });
+          } else {
+            console.log("[Latency] No matching session found");
           }
         }
       } catch {
