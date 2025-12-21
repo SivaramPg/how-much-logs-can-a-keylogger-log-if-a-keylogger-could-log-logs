@@ -160,7 +160,7 @@ new Elysia()
       .where(sql`${keystrokeBatch.latencyMs} IS NOT NULL`)
       .groupBy(keystrokeBatch.sessionId, keystrokeBatch.countryCode)
       .having(sql`count(*) >= 1`) // Show latency data immediately
-      .orderBy(sql`avg(${keystrokeBatch.latencyMs}) DESC`) // Most suspicious first
+      .orderBy(sql`sum(${keystrokeBatch.count}) DESC`) // Leaderboard: most keystrokes first
       .limit(50);
 
     return results;

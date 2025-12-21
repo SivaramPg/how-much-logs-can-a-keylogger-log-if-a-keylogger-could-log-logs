@@ -16,9 +16,9 @@ export interface RouterAppContext {
 }
 
 const siteConfig = {
-  title: "KEYLOGGER - How much logs can a keylogger log?",
+  title: "KEYLOGGER - Type more, climb higher, get snooped harder",
   description:
-    "A playful experiment tracking global keystrokes in real-time. Inspired by Amazon's latency detection protocol. No actual keys are logged - only counts!",
+    "A global keystroke leaderboard. Compete to be the most watched. No actual keys are logged - only counts. Inspired by Amazon's latency detection protocol.",
   url: "https://how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs.sivaramp.com",
   image: "/opengraph-image.png",
   creator: "@SivaramPg",
