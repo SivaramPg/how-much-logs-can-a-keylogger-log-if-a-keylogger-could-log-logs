@@ -6,7 +6,16 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), nitro({ preset: 'bun' }), viteReact()],
+  plugins: [
+    tsconfigPaths(),
+    tailwindcss(),
+    tanstackStart(),
+    nitro({
+      preset: "bun",
+      publicAssets: [{ dir: "public", maxAge: 60 * 60 * 24 * 365 }],
+    }),
+    viteReact(),
+  ],
   server: {
     port: 3001,
   },
