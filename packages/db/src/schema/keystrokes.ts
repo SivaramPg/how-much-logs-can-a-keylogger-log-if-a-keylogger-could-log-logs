@@ -7,13 +7,12 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { session } from "./auth";
 
 export const keystrokeBatch = pgTable("keystroke_batch", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sessionId: text("session_id").references(() => session.id, {
-    onDelete: "set null",
-  }),
+  // No FK constraint - sessionId is just a tracking identifier
+  // Sessions can expire/be deleted while keystroke data should persist
+  sessionId: text("session_id"),
   count: integer("count").notNull(),
   ipAddress: text("ip_address"),
   countryCode: text("country_code"),

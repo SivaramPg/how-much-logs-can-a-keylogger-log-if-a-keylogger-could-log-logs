@@ -112,16 +112,16 @@ export function LatencyStats() {
       </div>
 
       {/* Sessions Table */}
-      <div className="overflow-hidden border border-green-900/50">
+      <div className="max-h-[400px] overflow-y-auto border border-green-900/50 scrollbar-thin scrollbar-track-black scrollbar-thumb-green-900">
         <table className="w-full text-sm">
-          <thead className="bg-green-900/20 text-xs uppercase tracking-wider text-green-400">
+          <thead className="bg-green-900/20 text-xs uppercase tracking-wider text-green-400 sticky top-0">
             <tr>
-              <th className="px-3 py-2 text-left font-medium">SESSION_ID</th>
-              <th className="px-3 py-2 text-right font-medium">AVG</th>
-              <th className="px-3 py-2 text-right font-medium">MIN</th>
-              <th className="px-3 py-2 text-right font-medium">MAX</th>
-              <th className="px-3 py-2 text-right font-medium">LAST_SEEN</th>
-              <th className="px-3 py-2 text-right font-medium">STATUS</th>
+              <th className="px-3 py-2 text-left font-medium bg-green-900/20">SESSION_ID</th>
+              <th className="px-3 py-2 text-right font-medium bg-green-900/20">AVG</th>
+              <th className="px-3 py-2 text-right font-medium bg-green-900/20">MIN</th>
+              <th className="px-3 py-2 text-right font-medium bg-green-900/20">MAX</th>
+              <th className="px-3 py-2 text-right font-medium bg-green-900/20">LAST_SEEN</th>
+              <th className="px-3 py-2 text-right font-medium bg-green-900/20">STATUS</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-green-900/30">
