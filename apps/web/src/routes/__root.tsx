@@ -25,6 +25,21 @@ const siteConfig = {
   creator: "@SivaramPg",
 };
 
+const getAnalyticsScript = () => {
+  const isProd = import.meta.env.PROD;
+  if (isProd) {
+    return {
+      src: "https://varam-analytics.sivaramp.com/scripts/gojo.js",
+      defer: true,
+    };
+  }
+  return {
+    src: "https://varam-analytics.sivaramp.com/scripts/sukuna.js",
+    defer: true,
+    "data-debug": "how-much-logs-can-a-keylogger-log-if-a-keylogger-could-log-logs.sivaramp.com",
+  };
+};
+
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
@@ -55,6 +70,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "canonical", href: siteConfig.url },
     ],
+    scripts: [getAnalyticsScript()],
   }),
 
   component: RootDocument,
